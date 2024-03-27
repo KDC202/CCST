@@ -5,10 +5,10 @@ from config import cfg
 from model import build_model
 from data import build_dataset
 from utils.losses import create_criterion
-from utils.utils import make_if_not_exist
+# from utils.utils import make_if_not_exist
 from utils import trainer, val
 from torch.utils.tensorboard import SummaryWriter
-from utils import Checkpointer, create_optimizer, create_scheduler
+from utils import create_optimizer, create_scheduler
 from glob import glob
 import numpy as np
 import time
@@ -79,7 +79,7 @@ def train(cfg, output, restore):
 
     criterion = create_criterion(cfg)
 
-    checkpointer = Checkpointer(model, optimizer, lr_scheduler, save_dir=output + '/models')
+    # checkpointer = Checkpointer(model, optimizer, lr_scheduler, save_dir=output + '/models')
     train_loader, val_loader = build_dataset(cfg, mode='train')
     writer = SummaryWriter(output + '/log' )
 
@@ -97,7 +97,7 @@ def train(cfg, output, restore):
                 writer.add_image('histogram_2d/xy', heat_map, epoch)
                 writer.add_image('histogram_2d/xx', heat_map_x, epoch)
                 writer.add_image('histogram_2d/yy', heat_map_y, epoch)
-                checkpointer.save(epoch)
+                # checkpointer.save(epoch)
 
         else:
             train_loss_w, train_loss = trainer(model, optimizer, train_loader, criterion, epoch, visual=True)
@@ -189,9 +189,9 @@ def infe(cfg):
 def main():
     parser = argparse.ArgumentParser(description="FeCT training and evaluation")
     parser.add_argument("--config-file", type=str, default='./config/Deep1M/ccst_x4.yaml')
-    parser.add_argument("--device", type=str, default='5')
+    parser.add_argument("--device", type=str, default='0')
     parser.add_argument("--mode", type=str, default='train')
-    parser.add_argument("--restore", type=bool, default=True)
+    parser.add_argument("--restore", type=bool, default=False)
     args = parser.parse_args()
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.device
@@ -200,7 +200,7 @@ def main():
 
     if args.mode == 'train':
         output_dir = os.path.join(cfg.OUTPUT_DIR, cfg.DATASET.DATA_NAME, '{}_x{}_{}'.format(cfg.STRUC.MODEL, cfg.STRUC.C_FACTOR, cfg.SOLVER.LOSS), 'Train')
-        make_if_not_exist(output_dir)
+        # make_if_not_exist(output_dir)
         train(cfg, output_dir, args.restore)
     elif args.mode == 'infe':
         infe(cfg)

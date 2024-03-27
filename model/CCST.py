@@ -23,9 +23,8 @@ class CCST(torch.nn.Module):
                  mlp_ratio=2,
                 ):
         super().__init__()
-
+        # nn.Hardswish 是一个激活函数，用于神经网络的中间层。
         mlp_activation = nn.Hardswish
-
         self.trans = nn.ModuleList()
         self.token_num = token_num
         self.token_dim = Dim * expand // token_num
@@ -36,6 +35,7 @@ class CCST(torch.nn.Module):
 
         self.MRP_tokens = nn.Sequential(
             nn.Linear(Dim, Dim * expand, bias=True),
+            # 一个批标准化层，用于对输入进行批次归一化
             nn.BatchNorm1d(Dim * expand)
         )
 
@@ -44,7 +44,8 @@ class CCST(torch.nn.Module):
         neg_v, pos_v = -torch.sqrt(s/self.token_dim), torch.sqrt(s/self.token_dim)
 
         proj_matrices = torch.zeros((Dim*expand, Dim))
-        matrix_g = tdist.Uniform(torch.tensor([0.0]), torch.tensor([1.0]))
+        # 均匀分布对象
+        matrix_g = tdist.Uniform(torch.tensor([0.0]), torch.tensor([1.0])) 
         prob_matrices = matrix_g.sample((Dim*expand, Dim)).squeeze(dim=2)
         proj_matrices[prob_matrices<=(1/2/s)]=neg_v
         proj_matrices[prob_matrices >= 1- (1 / 2 / s)] = pos_v
